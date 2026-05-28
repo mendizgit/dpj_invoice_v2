@@ -494,7 +494,9 @@
       });
       if (!res.ok) throw new Error('Server error: ' + res.status);
 
-      const blob = await res.blob();
+      // ── Force PDF blob type (fixes Android XML download bug) ──
+      const arrayBuffer = await res.arrayBuffer();
+      const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
       const url  = URL.createObjectURL(blob);
       const fileName = `Quotation_${document.getElementById('quotationRef').value.replace(/\//g, '_')}.pdf`;
 
@@ -502,6 +504,18 @@
         const tab = window.open(url, '_blank');
         if (!tab) { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.click(); }
         showIOSTip();
+      } else if (/Android/i.test(navigator.userAgent)) {
+        // Android: open in new tab instead of direct download
+        const tab = window.open(url, '_blank');
+        if (!tab) {
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
       } else {
         const a = document.createElement('a');
         a.href = url;
