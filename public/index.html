@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DPJ Engineering - Quotation</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="container">
+  <h1>DPJ Engineering<br/><span>Quotation Generator</span></h1>
+
+  <!-- CUSTOMER DETAILS -->
+  <div class="card">
+    <h2>📋 Customer Details</h2>
+    <div class="row">
+      <div class="form-group">
+        <label>Quotation Ref *</label>
+        <input type="text" id="quotationRef" placeholder="Auto-generating..." />
+      </div>
+      <div class="form-group">
+        <label>Date *</label>
+        <input type="date" id="quotationDate" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Customer Name *</label>
+      <input type="text" id="customerName" placeholder="Full name" />
+    </div>
+    <div class="form-group">
+      <label>Customer Address</label>
+      <input type="text" id="customerAddress" placeholder="Address" />
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="customerPhone" placeholder="07xxxxxxxx" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="customerEmail" placeholder="email@example.com" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Site Address</label>
+      <input type="text" id="siteAddress" placeholder="Inspection site location" />
+    </div>
+  </div>
+
+  <!-- PRICE ZONE & TESTING SERVICES -->
+  <div class="card">
+    <h2>📍 Price Zone & Testing Services</h2>
+    <div class="form-group">
+      <label>Select Price Zone *</label>
+      <select id="zoneSelect">
+        <option value="">-- Select Zone --</option>
+      </select>
+    </div>
+    <div id="testingItemsList">
+      <div class="zone-placeholder">Select a price zone above to load available services</div>
+    </div>
+  </div>
+
+  <!-- CONTRACTOR PAYMENT -->
+  <div class="card">
+    <h2>🔧 Contractor Payment</h2>
+    <p class="hint">Select applicable contractor payment items</p>
+    <div id="contractorItems"></div>
+  </div>
+
+  <!-- ADDITIONAL SERVICES -->
+  <div class="card">
+    <h2>⚡ Additional Services</h2>
+    <div id="additionalItems"></div>
+  </div>
+
+  <!-- SOLAR INSPECTION -->
+  <div class="card">
+    <h2>☀️ Solar Inspection</h2>
+    <div id="solarItems"></div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div class="card">
+    <h2>💼 Expenses</h2>
+    <p class="hint">Only non-zero values will appear in PDF</p>
+    <div class="form-group">
+      <label>Accommodation (nights) — LKR 10,000/night</label>
+      <input type="number" id="accommodation" min="0" value="0" />
+    </div>
+    <div class="checkbox-item">
+      <input type="checkbox" id="dayExpenses" />
+      <label for="dayExpenses">Day Expenses (more than 5h site visit)</label>
+      <span class="price">LKR 3,500</span>
+    </div>
+    <div class="checkbox-item">
+      <input type="checkbox" id="mobileCharge" />
+      <label for="mobileCharge">Mobile Service Charge</label>
+      <span class="price">LKR 3,500</span>
+    </div>
+    <div class="form-group" style="margin-top:8px;">
+      <label>Additional Site Visit Charge (LKR)</label>
+      <input type="number" id="additionalVisit" min="0" value="0" />
+    </div>
+  </div>
+
+  <!-- TRANSPORT -->
+  <div class="card">
+    <h2>🚗 Transport</h2>
+    <p class="hint">Enter km for each applicable tier. Only the total appears in PDF.</p>
+    <div class="transport-row">
+      <div><label>Distance &lt; 200 km</label><div class="rate">@ LKR 100/km</div></div>
+      <input type="number" class="qty-input" id="t1km" min="0" value="0" />
+      <div class="calc" id="t1calc">LKR 0</div>
+    </div>
+    <div class="transport-row">
+      <div><label>Distance 200–500 km</label><div class="rate">@ LKR 95/km</div></div>
+      <input type="number" class="qty-input" id="t2km" min="0" value="0" />
+      <div class="calc" id="t2calc">LKR 0</div>
+    </div>
+    <div class="transport-row">
+      <div><label>Distance &gt; 500 km</label><div class="rate">@ LKR 90/km</div></div>
+      <input type="number" class="qty-input" id="t3km" min="0" value="0" />
+      <div class="calc" id="t3calc">LKR 0</div>
+    </div>
+    <div class="transport-total">Total Transport: <span id="transportTotal">LKR 0</span></div>
+  </div>
+
+  <!-- DISCOUNT -->
+  <div class="card">
+    <h2>🏷️ Discount</h2>
+    <div class="form-group">
+      <label>Discount Amount (LKR)</label>
+      <input type="number" id="discount" min="0" value="0" />
+    </div>
+  </div>
+
+  <!-- TOTALS -->
+  <div class="total-box">
+    <div class="total-row"><span>Subtotal</span><span id="subtotalDisplay">LKR 0</span></div>
+    <div class="total-row"><span>Transport</span><span id="transportDisplay">LKR 0</span></div>
+    <div class="total-row discount"><span>Discount</span><span id="discountDisplay">- LKR 0</span></div>
+    <div class="total-row grand"><span>Grand Total</span><span id="grandTotalDisplay">LKR 0</span></div>
+  </div>
+
+  <button class="btn btn-primary" id="downloadBtn">
+    📄 Generate & Download PDF
+  </button>
+  <div style="height:30px;"></div>
+</div>
+
+<script>
+  let quotationData = {};
+  let selectedZone = '';
+
+  window.addEventListener('DOMContentLoaded', async () => {
+
+    // Set today's date
+    document.getElementById('quotationDate').valueAsDate = new Date();
+
+    // Fetch next ref number
+    try {
+      const refRes = await fetch('/api/next-ref');
+      const refData = await refRes.json();
+      document.getElementById('quotationRef').value = refData.ref;
+    } catch (e) {
+      console.warn('Could not fetch ref:', e);
+    }
+
+    // Load quotation data
+    try {
+      const res = await fetch('/api/quotations');
+      quotationData = await res.json();
+      buildZoneDropdown();
+      populateContractor();
+      populateAdditional();
+      populateSolar();
+    } catch (err) {
+      alert('Error loading quotation data. Please refresh.');
+      console.error(err);
+    }
+
+    // ── Static element listeners ─────────────────────────────
+    document.getElementById('zoneSelect').addEventListener('change', onZoneChange);
+    document.getElementById('accommodation').addEventListener('input', updateTotals);
+    document.getElementById('dayExpenses').addEventListener('change', updateTotals);
+    document.getElementById('mobileCharge').addEventListener('change', updateTotals);
+    document.getElementById('additionalVisit').addEventListener('input', updateTotals);
+    document.getElementById('discount').addEventListener('input', updateTotals);
+    document.getElementById('downloadBtn').addEventListener('click', generateAndDownload);
+
+    ['t1km', 't2km', 't3km'].forEach(id =>
+      document.getElementById(id).addEventListener('input', updateTransport)
+    );
+
+    // ── Event delegation for dynamic checkboxes / qty inputs ─
+    document.getElementById('testingItemsList').addEventListener('change', updateTotals);
+    document.getElementById('testingItemsList').addEventListener('input', updateTotals);
+    document.getElementById('contractorItems').addEventListener('change', updateTotals);
+    document.getElementById('additionalItems').addEventListener('change', updateTotals);
+    document.getElementById('additionalItems').addEventListener('input', updateTotals);
+    document.getElementById('solarItems').addEventListener('change', updateTotals);
+  });
+
+  // ── Zone Dropdown ────────────────────────────────────────────
+  function buildZoneDropdown() {
+    const sel = document.getElementById('zoneSelect');
+    sel.innerHTML = '<option value="">-- Select Zone --</option>';
+    (quotationData.zones || ['Other Area', 'Kandy Area']).forEach(zone => {
+      const opt = document.createElement('option');
+      opt.value = zone;
+      opt.textContent = zone;
+      sel.appendChild(opt);
+    });
+
+    // Set "Other Area" as default
+    sel.value = 'Other Area';
+    selectedZone = 'Other Area';
+    renderTestingCheckboxes('Other Area');
+    updateTotals();
+  }
+
+  function onZoneChange() {
+    selectedZone = document.getElementById('zoneSelect').value;
+    renderTestingCheckboxes(selectedZone);
+    updateTotals();
+  }
+
+  // ── Testing Items ────────────────────────────────────────────
+  function renderTestingCheckboxes(zone) {
+    const container = document.getElementById('testingItemsList');
+
+    if (!zone) {
+      container.innerHTML = '<div class="zone-placeholder">Select a price zone above to load available services</div>';
+      return;
+    }
+
+    // Save checked states before re-render
+    const checkedStates = {};
+    (quotationData.mainTesting || []).forEach((_, i) => {
+      const el = document.getElementById(`testing_${i}`);
+      if (el) checkedStates[i] = el.checked;
+    });
+
+    container.innerHTML = '';
+    if (!quotationData.mainTesting || quotationData.mainTesting.length === 0) {
+      container.innerHTML = '<div class="zone-placeholder">No services found for this zone.</div>';
+      return;
+    }
+
+    quotationData.mainTesting.forEach((item, i) => {
+      const price = (item.prices && item.prices[zone]) ? item.prices[zone] : 0;
+      const div = document.createElement('div');
+      div.className = 'checkbox-item';
+      div.innerHTML = `
+        <input type="checkbox" id="testing_${i}" ${checkedStates[i] ? 'checked' : ''} />
+        <label for="testing_${i}">${item.item}</label>
+        <span class="price">LKR ${price.toLocaleString()}</span>`;
+      container.appendChild(div);
+    });
+  }
+
+  // ── Contractor Payment ───────────────────────────────────────
+  function populateContractor() {
+    const c = document.getElementById('contractorItems');
+    c.innerHTML = '';
+    (quotationData.contractorPayment || []).forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'checkbox-item';
+      div.innerHTML = `
+        <input type="checkbox" id="contractor_${i}" />
+        <label for="contractor_${i}">${item.item}</label>
+        <span class="price">LKR ${item.price.toLocaleString()}</span>`;
+      c.appendChild(div);
+    });
+  }
+
+  // ── Additional Services ──────────────────────────────────────
+  function populateAdditional() {
+    const c = document.getElementById('additionalItems');
+    c.innerHTML = '';
+    (quotationData.additionalServices || []).forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'checkbox-item';
+      div.innerHTML = `
+        <input type="checkbox" id="additional_${i}" />
+        <label for="additional_${i}">${item.item}
+          ${item.hasQty ? '<span style="color:#888;font-size:0.78rem;">(× qty)</span>' : ''}</label>
+        ${item.hasQty
+          ? `<input type="number" class="qty-input" id="addqty_${i}" min="1" value="1" />`
+          : ''}
+        <span class="price">LKR ${item.price.toLocaleString()}</span>`;
+      c.appendChild(div);
+    });
+  }
+
+  // ── Solar Inspection ─────────────────────────────────────────
+  function populateSolar() {
+    const c = document.getElementById('solarItems');
+    c.innerHTML = '';
+    (quotationData.solarInspection || []).forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'checkbox-item';
+      div.innerHTML = `
+        <input type="checkbox" id="solar_${i}" />
+        <label for="solar_${i}">${item.item}</label>
+        <span class="price">LKR ${item.price.toLocaleString()}</span>`;
+      c.appendChild(div);
+    });
+  }
+
+  // ── Transport ────────────────────────────────────────────────
+  function updateTransport() {
+    const c1 = (parseFloat(document.getElementById('t1km').value) || 0) * 100;
+    const c2 = (parseFloat(document.getElementById('t2km').value) || 0) * 95;
+    const c3 = (parseFloat(document.getElementById('t3km').value) || 0) * 90;
+    document.getElementById('t1calc').textContent = `LKR ${c1.toLocaleString()}`;
+    document.getElementById('t2calc').textContent = `LKR ${c2.toLocaleString()}`;
+    document.getElementById('t3calc').textContent = `LKR ${c3.toLocaleString()}`;
+    document.getElementById('transportTotal').textContent = `LKR ${(c1 + c2 + c3).toLocaleString()}`;
+    updateTotals();
+  }
+
+  // ── Totals ───────────────────────────────────────────────────
+  function updateTotals() {
+    let subtotal = 0;
+
+    // Testing items
+    (quotationData.mainTesting || []).forEach((item, i) => {
+      if (document.getElementById(`testing_${i}`)?.checked) {
+        subtotal += (item.prices && item.prices[selectedZone]) ? item.prices[selectedZone] : 0;
+      }
+    });
+
+    // Contractor
+    (quotationData.contractorPayment || []).forEach((item, i) => {
+      if (document.getElementById(`contractor_${i}`)?.checked) subtotal += item.price;
+    });
+
+    // Additional
+    (quotationData.additionalServices || []).forEach((item, i) => {
+      if (document.getElementById(`additional_${i}`)?.checked) {
+        const qty = item.hasQty
+          ? (parseInt(document.getElementById(`addqty_${i}`)?.value) || 1)
+          : 1;
+        subtotal += item.price * qty;
+      }
+    });
+
+    // Solar
+    (quotationData.solarInspection || []).forEach((item, i) => {
+      if (document.getElementById(`solar_${i}`)?.checked) subtotal += item.price;
+    });
+
+    // Expenses
+    const nights = parseInt(document.getElementById('accommodation').value) || 0;
+    subtotal += nights * 10000;
+    if (document.getElementById('dayExpenses').checked) subtotal += 3500;
+    if (document.getElementById('mobileCharge').checked) subtotal += 3500;
+    subtotal += parseFloat(document.getElementById('additionalVisit').value) || 0;
+
+    const transport =
+      (parseFloat(document.getElementById('t1km').value) || 0) * 100 +
+      (parseFloat(document.getElementById('t2km').value) || 0) * 95 +
+      (parseFloat(document.getElementById('t3km').value) || 0) * 90;
+
+    const discount = parseFloat(document.getElementById('discount').value) || 0;
+    const grand = Math.max(0, subtotal + transport - discount);
+
+    document.getElementById('subtotalDisplay').textContent  = `LKR ${subtotal.toLocaleString()}`;
+    document.getElementById('transportDisplay').textContent = `LKR ${transport.toLocaleString()}`;
+    document.getElementById('discountDisplay').textContent  = `- LKR ${discount.toLocaleString()}`;
+    document.getElementById('grandTotalDisplay').textContent = `LKR ${grand.toLocaleString()}`;
+  }
+
+  // ── Payload Builder ──────────────────────────────────────────
+  function getPayload() {
+    const items = [];
+
+    (quotationData.mainTesting || []).forEach((item, i) => {
+      if (document.getElementById(`testing_${i}`)?.checked) {
+        const price = (item.prices && item.prices[selectedZone]) ? item.prices[selectedZone] : 0;
+        items.push({ item: item.item, unitPrice: price, quantity: 1 });
+      }
+    });
+
+    (quotationData.contractorPayment || []).forEach((item, i) => {
+      if (document.getElementById(`contractor_${i}`)?.checked)
+        items.push({ item: item.item, unitPrice: item.price, quantity: 1 });
+    });
+
+    (quotationData.additionalServices || []).forEach((item, i) => {
+      if (document.getElementById(`additional_${i}`)?.checked) {
+        const qty = item.hasQty
+          ? (parseInt(document.getElementById(`addqty_${i}`)?.value) || 1)
+          : 1;
+        items.push({ item: item.item, unitPrice: item.price, quantity: qty });
+      }
+    });
+
+    (quotationData.solarInspection || []).forEach((item, i) => {
+      if (document.getElementById(`solar_${i}`)?.checked)
+        items.push({ item: item.item, unitPrice: item.price, quantity: 1 });
+    });
+
+    const nights = parseInt(document.getElementById('accommodation').value) || 0;
+    if (nights > 0)
+      items.push({ item: `Accommodation (${nights} night${nights > 1 ? 's' : ''})`, unitPrice: 10000, quantity: nights });
+    if (document.getElementById('dayExpenses').checked)
+      items.push({ item: 'Day Expenses (more than 5h site visit)', unitPrice: 3500, quantity: 1 });
+    if (document.getElementById('mobileCharge').checked)
+      items.push({ item: 'Mobile Service Charge', unitPrice: 3500, quantity: 1 });
+    const addVisit = parseFloat(document.getElementById('additionalVisit').value) || 0;
+    if (addVisit > 0)
+      items.push({ item: 'Additional Site Visit Charge', unitPrice: addVisit, quantity: 1 });
+
+    const transport =
+      (parseFloat(document.getElementById('t1km').value) || 0) * 100 +
+      (parseFloat(document.getElementById('t2km').value) || 0) * 95 +
+      (parseFloat(document.getElementById('t3km').value) || 0) * 90;
+
+    return {
+      customerName:    document.getElementById('customerName').value.trim(),
+      customerAddress: document.getElementById('customerAddress').value.trim(),
+      customerPhone:   document.getElementById('customerPhone').value.trim(),
+      customerEmail:   document.getElementById('customerEmail').value.trim(),
+      siteAddress:     document.getElementById('siteAddress').value.trim(),
+      quotationRef:    document.getElementById('quotationRef').value.trim(),
+      date:            document.getElementById('quotationDate').value,
+      zone:            selectedZone,
+      items,
+      transport,
+      discount: parseFloat(document.getElementById('discount').value) || 0
+    };
+  }
+
+  // ── Validation ───────────────────────────────────────────────
+  function validate() {
+   
+    if (!document.getElementById('quotationRef').value.trim()) {
+      alert('⚠️ Enter Quotation Reference.'); return false;
+    }
+    if (!document.getElementById('customerName').value.trim()) {
+      alert('⚠️ Enter Customer Name.'); return false;
+    }
+    if (!document.getElementById('quotationDate').value) {
+      alert('⚠️ Select a Date.'); return false;
+    }
+
+    const anyChecked =
+      (quotationData.mainTesting || []).some((_, i) => document.getElementById(`testing_${i}`)?.checked) ||
+      (quotationData.contractorPayment || []).some((_, i) => document.getElementById(`contractor_${i}`)?.checked) ||
+      (quotationData.additionalServices || []).some((_, i) => document.getElementById(`additional_${i}`)?.checked) ||
+      (quotationData.solarInspection || []).some((_, i) => document.getElementById(`solar_${i}`)?.checked);
+
+    if (!anyChecked) {
+      alert('⚠️ Please select at least one service item.'); return false;
+    }
+    return true;
+  }
+
+  // ── iOS Detection ────────────────────────────────────────────
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  function showIOSTip() {
+    const existing = document.getElementById('iosTip');
+    if (existing) existing.remove();
+    const tip = document.createElement('div');
+    tip.id = 'iosTip';
+    tip.innerHTML = `📄 PDF opened in new tab.<br/>Tap <strong>Share ⬆️</strong> → <strong>"Save to Files"</strong><br/><br/>
+      <span id="iosTipClose"
+        style="background:#4f46e5;padding:6px 16px;border-radius:8px;cursor:pointer;">Got it ✓</span>`;
+    document.body.appendChild(tip);
+    document.getElementById('iosTipClose').addEventListener('click', () => tip.remove());
+    setTimeout(() => { if (tip.parentElement) tip.remove(); }, 8000);
+  }
+
+  // ── Generate & Download PDF ──────────────────────────────────
+  async function generateAndDownload() {
+    if (!validate()) return;
+
+    const btn = document.getElementById('downloadBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating...';
+
+    try {
+      const res = await fetch('/api/invoice/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(getPayload())
+      });
+      if (!res.ok) throw new Error('Server error: ' + res.status);
+
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const fileName = `Quotation_${document.getElementById('quotationRef').value.replace(/\//g, '_')}.pdf`;
+
+      if (isIOS()) {
+        const tab = window.open(url, '_blank');
+        if (!tab) { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.click(); }
+        showIOSTip();
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+      // Refresh ref for next quotation
+      try {
+        const nextRes  = await fetch('/api/next-ref');
+        const nextData = await nextRes.json();
+        document.getElementById('quotationRef').value = nextData.ref;
+      } catch (e) {}
+
+    } catch (err) {
+      alert('❌ PDF generation failed. Check console for details.');
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '📄 Generate & Download PDF';
+    }
+  }
+</script>
+</body>
+</html>

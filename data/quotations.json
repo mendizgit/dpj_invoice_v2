@@ -1,0 +1,36 @@
+{
+  "zones": ["Other Area", "Kandy Area"],
+  "mainTesting": [
+    { "item": "30A/1 phase Testing & Meter Shifting Document", "prices": { "Other Area": 12500, "Kandy Area": 20000 } },
+    { "item": "30A/3 phase Testing & Document with SLD", "prices": { "Other Area": 15000, "Kandy Area": 30000 } },
+    { "item": "60A/3 phase Testing & Document with SLD", "prices": { "Other Area": 20000, "Kandy Area": 32500 } }
+  ],
+  "contractorPayment": [
+    { "item": "30A/1 phase - Contractor Payment", "price": 25000 },
+    { "item": "30A/3 phase - Contractor Payment", "price": 32500 },
+    { "item": "60A/3 phase - Contractor Payment", "price": 35000 }
+  ],
+  "additionalServices": [
+    { "item": "Council Approval Letter Certification", "price": 13500, "hasQty": false },
+    { "item": "Council Approval Drawing Set Certification", "price": 25000, "hasQty": false },
+    { "item": "Earthing Testing 01 Nos. pit", "price": 5000, "hasQty": true },
+    { "item": "Earthing Test Report", "price": 5000, "hasQty": false },
+    { "item": "Bulk Supply Proposal Load Calculation", "price": 25000, "hasQty": false },
+    { "item": "Generator Capacity Calculation", "price": 10000, "hasQty": false },
+    { "item": "Advice & Consultation for 7kVA", "price": 5000, "hasQty": false },
+    { "item": "Advice & Consultation for 21kVA & 43kVA", "price": 15000, "hasQty": false },
+    { "item": "Thermography (Thermal Image 01 Nos.)", "price": 5000, "hasQty": true },
+    { "item": "Electrical fault finding - 07kVA ", "price": 10000, "hasQty": false },
+    { "item": "Electrical fault finding - 21kVA ", "price": 15000, "hasQty": false },
+    { "item": "Electrical fault finding - 43kVA ", "price": 20000, "hasQty": false }
+
+  ],
+  "solarInspection": [
+    { "item": "Solar Inspection & Document Certification 5kW", "price": 15000 },
+    { "item": "Solar Inspection & Document Certification 10kW", "price": 17500 },
+    { "item": "Solar Inspection & Document Certification 15kW", "price": 20000 },
+    { "item": "Solar Inspection & Document Certification 20kW", "price": 22500 },
+    { "item": "Solar Inspection & Document Certification 30kW", "price": 27500 },
+    { "item": "Solar Inspection & Document Certification 40kW", "price": 32500 }
+  ]
+}

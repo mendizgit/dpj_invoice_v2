@@ -1,0 +1,25 @@
+
+{
+  "name": "dpj-invoice-v2",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://mendizgit@github.com/mendizgit/test_invoice.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mendizgit/test_invoice/issues"
+  },
+  "homepage": "https://github.com/mendizgit/test_invoice#readme",
+  "description": "",
+  "dependencies": {
+    "nodemailer": "^8.0.8",
+    "express": "^4.18.2",
+    "pdfkit": "^0.14.0"
+  }
+}
