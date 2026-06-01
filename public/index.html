@@ -51,6 +51,19 @@
   <div class="card">
     <h2>📍 Price Zone & Testing Services</h2>
     <div class="form-group">
+    <label>Office Location *</label>
+    <select id="officeLocation">
+      <option value="">-- Select Office Location --</option>
+      <option value="Western Province Office" selected>Western Province Office</option>
+      <option value="Central Province Office">Central Province Office</option>
+      <option value="North Central Province Office">North Central Province Office</option>
+      <option value="Sabaragamuwa Province Office">Sabaragamuwa Province Office</option>
+      <option value="Southern Province Office">Southern Province Office</option>
+      <option value="Eastern Province Office">Eastern Province Office</option>
+    </select>
+  </div>
+
+    <div class="form-group">
       <label>Select Price Zone *</label>
       <select id="zoneSelect">
         <option value="">-- Select Zone --</option>
@@ -428,6 +441,7 @@
       quotationRef:    document.getElementById('quotationRef').value.trim(),
       date:            document.getElementById('quotationDate').value,
       zone:            selectedZone,
+      officeLocation:  document.getElementById('officeLocation').value.trim(),
       items,
       transport,
       discount: parseFloat(document.getElementById('discount').value) || 0
@@ -446,7 +460,11 @@
     if (!document.getElementById('quotationDate').value) {
       alert('⚠️ Select a Date.'); return false;
     }
-
+    if (!selectedZone) selectedZone = 'Other Area';
+    const officeLocation = document.getElementById('officeLocation').value;
+    if (!officeLocation) {
+      alert('⚠️ Please select an Office Location.'); return false;
+    }
     const anyChecked =
       (quotationData.mainTesting || []).some((_, i) => document.getElementById(`testing_${i}`)?.checked) ||
       (quotationData.contractorPayment || []).some((_, i) => document.getElementById(`contractor_${i}`)?.checked) ||

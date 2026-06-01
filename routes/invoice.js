@@ -86,7 +86,15 @@ router.post('/generate', (req, res) => {
     const lhPath = path.join(__dirname, '../assets/Letter_head.jpg');
     if (fs.existsSync(lhPath)) doc.image(lhPath, M, M, { width: CW });
 
-    let y = 155;
+    let y = 125;
+
+    // ─ Office Location (right-aligned, 1 line space below header) ─
+    const { officeLocation } = req.body;
+    if (officeLocation) {
+      doc.font('Helvetica-Bold').fontSize(9).fillColor('#333');
+      doc.text(officeLocation.toUpperCase(), M, y, { align: 'right', width: CW });
+      
+    }
 
     // ─ 1. Ref LEFT, Date LEFTaligned ───────
     doc.font('Helvetica').fontSize(9).fillColor('#333');
