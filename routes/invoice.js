@@ -266,7 +266,7 @@ router.post('/generate', (req, res) => {
           doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#333');
           doc.text('Authorized Signature:', M, y); y += 8;
           doc.image(sigPath, M, y, { width: sigW });
-          y += sigH + 10;
+          y += sigH + 15;
         } else {
           console.warn('⚠️  Signature image not found at:', sigPath);
         }
