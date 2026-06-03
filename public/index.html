@@ -420,7 +420,7 @@
     if (nights > 0)
       items.push({ item: `Accommodation (${nights} night${nights > 1 ? 's' : ''})`, unitPrice: 10000, quantity: nights });
     if (document.getElementById('dayExpenses').checked)
-      items.push({ item: 'Day Expenses charges', unitPrice: 3500, quantity: 1 });
+      items.push({ item: 'Day Expenses Charges', unitPrice: 3500, quantity: 1 });
     if (document.getElementById('mobileCharge').checked)
       items.push({ item: 'Mobile Service Charge', unitPrice: 3500, quantity: 1 });
     const addVisit = parseFloat(document.getElementById('additionalVisit').value) || 0;
